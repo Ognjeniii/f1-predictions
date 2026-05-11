@@ -1,18 +1,25 @@
 import streamlit as st
+import pandas as pd
+from feature_generators.FeatureGenerator1 import FeatureGenerator1
+from data.DB import DB
 
-st.set_page_config(
-    page_title="F1 Prediction System",
-    layout="wide"
-)
+# st.set_page_config(
+#     page_title="F1 Prediction System",
+#     layout="wide"
+# )
 
-st.title("F1 Prediction System")
+# st.title("F1 Prediction System")
 
-st.write("""
-This application demonstrates three machine learning problems:
+# st.write("""
+# This application demonstrates three machine learning problems:
 
-1. Driver points prediction
-2. Position change prediction
-3. Next lap time prediction
-""")
+# 1. Driver points prediction
+# 2. Position change prediction
+# 3. Next lap time prediction
+# """)
 
-st.info("Choose a page from the sidebar.")
+# st.info("Choose a page from the sidebar.")
+
+df = DB.get_data()
+points = FeatureGenerator1.before_race_points(df, 830, 2020, 5)
+print(points)
