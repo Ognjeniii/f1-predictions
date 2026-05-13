@@ -1,1 +1,1 @@
-from data import DB
+from DB import DB

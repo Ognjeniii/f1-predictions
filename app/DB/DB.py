@@ -9,11 +9,12 @@ class DB:
         constructor_standings_df = pd.read_csv('../data/constructor_standings.csv')
         drivers_df = pd.read_csv('../data/drivers.csv')
         qualifying_df = pd.read_csv('../data/qualifying.csv')
-        status_df = pd.read_csv('../data/status.csv')
+        results_df = pd.read_csv('../data/results.csv')
 
         races_df = races_df[races_df['raceId'] >= 1031]
         cols = ['raceId', 'circuitId', 'year', 'round', 'name', 'date', 'time']
         races_df = races_df[cols]
+        races_df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S')
 
         df = races_df.merge(qualifying_df, on='raceId', how='left')
 
@@ -39,5 +40,18 @@ class DB:
 
         drivers_red = drivers_df[['driverId', 'dob']]
         df = df.merge(drivers_red, on='driverId', how='left')
+        
+        results_df = results_df[['raceId', 'driverId', 'constructorId', 'positionOrder', 'positionText', 'rank']]
+        results_df = results_df.rename(columns={
+            'positionText': 'result_position_text'
+        })
 
+        df = df.merge(results_df, on=['raceId', 'driverId', 'constructorId'], how='left')
+
+        return df
+    
+    @staticmethod
+    def get_drivers():
+        df = pd.read_csv('../data/drivers.csv')
+        df['dob'] = pd.to_datetime(df['dob'])
         return df
