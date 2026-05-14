@@ -27,4 +27,7 @@ print(df)
 # points = FeatureGenerator1.before_race_points(df, 830, 2020, 5)
 # print(points)
 
+avg_finish_ham = FeatureGenerator1.get_avg_finish(df, 2020, 4, 1)
+print("Average wins: ", avg_finish_ham)
+
 

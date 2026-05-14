@@ -14,7 +14,7 @@ class DB:
         races_df = races_df[races_df['raceId'] >= 1031]
         cols = ['raceId', 'circuitId', 'year', 'round', 'name', 'date', 'time']
         races_df = races_df[cols]
-        races_df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S')
+        races_df['time'] = pd.to_datetime(races_df['time'], format='%H:%M:%S')
 
         df = races_df.merge(qualifying_df, on='raceId', how='left')
 

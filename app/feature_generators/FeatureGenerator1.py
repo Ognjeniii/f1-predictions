@@ -1,4 +1,6 @@
 import pandas as pd
+
+# da li svuda napraviti defaultne vrednosti za nazive kolona?
 class FeatureGenerator1:
     
     # Before applying this method, we must provide df which is merged from races and driver_standings
@@ -57,7 +59,6 @@ class FeatureGenerator1:
         
     @staticmethod
     def get_quali_round(q1, q2, q3):
-
         if q2 is None or q2 == "" or q2 == 0:
             return 1
         if q3 is None or q3 == "" or q3 == 0:
@@ -67,7 +68,6 @@ class FeatureGenerator1:
     # User must enter best q3 and q2 times. So, based on that we can calculate gap between current driver.
     @staticmethod
     def calculate_gap_to_pole(driver_time_ms, pole_time_ms):
-
         if (
             driver_time_ms is None or
             pole_time_ms is None
@@ -75,3 +75,12 @@ class FeatureGenerator1:
             return None
 
         return driver_time_ms - pole_time_ms
+
+    @staticmethod
+    def get_avg_finish(df, year, round, driverId):
+        df = df.sort_values(by=[year, round, driverId])
+
+        return (df.groupby(driverId)['positionOrder']
+        .transform(
+            lambda x: x.shift(1).rolling(3).mean()
+        ))
