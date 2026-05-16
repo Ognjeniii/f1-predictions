@@ -2,13 +2,16 @@ import streamlit as st
 import pandas as pd
 import joblib
 
+from mapping.first_problem.drivers import drivers_list
+from mapping.first_problem.constructors import ctor_list
+from mapping.first_problem.tracks import track_list
+
 # =========================
 # PAGE CONFIG
 # =========================
 
 st.set_page_config(
-    page_title="Points Prediction",
-    page_icon="🏎️",
+    page_title="F1 Points Prediction",
     layout="wide"
 )
 
@@ -22,182 +25,266 @@ model = joblib.load("models/model1.pkl")
 # TITLE
 # =========================
 
-st.title("🏎️ Points Prediction")
+st.title("Formula 1 Points Prediction")
 
 st.markdown("""
-This page predicts whether a Formula 1 driver will score points during the race.
+Predict whether a Formula 1 driver will score points during the race
+based on qualifying and race information.
 """)
 
 # =========================
-# FEATURES
+# FORM
 # =========================
 
-FEATURE_ORDER = [
-    "round",
-    "grid",
-    "before_race_points",
-    "before_race_position",
-    "before_race_wins",
-    "before_race_ctor_points",
-    "before_race_ctor_position",
-    "before_race_ctor_wins",
-    "q1_ms",
-    "q2_ms",
-    "q3_ms",
-    "driver_age",
-    "quali_round",
-    "q3_gap_to_pole",
-    "q2_gap_to_pole",
-    "drv_avg_finish_last_3",
-    "name",
-    "race_part_of_day"
-]
+with st.form("prediction_form"):
 
-# =========================
-# FRIENDLY FEATURE NAMES
-# =========================
+    # =========================
+    # RACE INFO
+    # =========================
 
-FRIENDLY_NAMES = {
-    "round": "Race Round",
-    "grid": "Starting Grid Position",
-    "before_race_points": "Driver Points Before Race",
-    "before_race_position": "Driver Championship Position",
-    "before_race_wins": "Driver Wins Before Race",
-    "before_race_ctor_points": "Constructor Points Before Race",
-    "before_race_ctor_position": "Constructor Championship Position",
-    "before_race_ctor_wins": "Constructor Wins Before Race",
-    "q1_ms": "Q1 Lap Time (ms)",
-    "q2_ms": "Q2 Lap Time (ms)",
-    "q3_ms": "Q3 Lap Time (ms)",
-    "driver_age": "Driver Age",
-    "quali_round": "Qualifying Round Reached",
-    "q3_gap_to_pole": "Q3 Gap To Pole (ms)",
-    "q2_gap_to_pole": "Q2 Gap To Pole (ms)",
-    "drv_avg_finish_last_3": "Average Finish Position (Last 3 Races)",
-    "name": "Grand Prix Name",
-    "race_part_of_day": "Part Of Day"
-}
+    st.subheader("Race Information")
 
-# =========================
-# FEATURE TABLE
-# =========================
+    col1, col2, col3 = st.columns(3)
 
-feature_df = pd.DataFrame({
-    "Order": range(1, len(FEATURE_ORDER) + 1),
-    "Feature": [FRIENDLY_NAMES[f] for f in FEATURE_ORDER]
-})
+    with col1:
+        year = st.number_input(
+            "Season Year",
+            min_value=2020,
+            max_value=2024,
+            value=2020
+        )
 
-with st.expander("📋 View Expected Feature Order"):
+    with col2:
+        round = st.number_input(
+            "Race Round",
+            min_value=1,
+            max_value=30,
+            value=1
+        )
 
-    st.dataframe(
-        feature_df,
-        use_container_width=True,
-        hide_index=True
+    with col3:
+        grid = st.number_input(
+            "Starting Grid Position",
+            min_value=1,
+            max_value=20,
+            value=10
+        )
+
+    # =========================
+    # DRIVER INFO
+    # =========================
+
+    st.subheader("Driver Information")
+
+    driver_name = st.selectbox(
+        "Driver",
+        options=list(drivers_list.keys())
     )
 
-# =========================
-# INPUT SECTION
-# =========================
+    driver_id = drivers_list[driver_name]
+    print('Driver: ', driver_id, ' - ', driver_name)
 
-st.subheader("📝 Input Values")
+    # =========================
+    # CONSTRUCTOR INFO
+    # =========================
 
-st.markdown("""
-Enter values separated by semicolon (`;`) following the displayed feature order.
-""")
+    st.subheader("Constructor")
 
-example_input = (
-    "8;6;45;6;0;778;3;0;80344;79962;79820;"
-    "20.81;3;933;1010;9.66;Italian Grand Prix;afternoon"
-)
+    constructor_name = st.selectbox(
+        "Constructor",
+        options=list(ctor_list.keys())
+    )
 
-user_input = st.text_input(
-    "Input",
-    value=example_input
-)
+    ctor_id = ctor_list[constructor_name]
+    print('Consturctor: ', ctor_id, ' - ', constructor_name)
+
+    # =========================
+    # QUALIFYING TIMES
+    # =========================
+
+    st.subheader("Qualifying Times")
+
+    st.markdown("""
+    Enter lap times in format: m:ss.ms or in miliseconds.
+    """)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        q1_ms = st.number_input(
+            "Q1 Time (ms)",
+            min_value=0
+        )
+
+    with col2:
+        q2_ms = st.number_input(
+            "Q2 Time (ms)",
+            min_value=0
+        )
+
+    with col3:
+        q3_ms = st.number_input(
+            "Q3 Time (ms)",
+            min_value=0
+        )
+
+    # =========================
+    # BEST SESSION TIMES
+    # =========================
+
+    st.subheader("Best Session Times")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        best_q2_ms = st.number_input(
+            "Best Q2 Time (ms)",
+            min_value=0
+        )
+
+    with col2:
+        best_q3_ms = st.number_input(
+            "Best Q3 Time (ms)",
+            min_value=0
+        )
+
+    # =========================
+    # TRACK INFO
+    # =========================
+
+    st.subheader("Track Information")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        track = st.selectbox(
+            "Grand Prix Name",
+            options=list(track_list)
+        )
+
+    with col2:
+        race_time = st.selectbox(
+            "Race Part Of Day",
+            options=[
+                "morning",
+                "afternoon",
+                "night"
+            ],
+            index=1
+        )
+
+    # =========================
+    # SUBMIT BUTTON
+    # =========================
+
+    submit = st.form_submit_button(
+        "Predict",
+        use_container_width=True
+    )
 
 # =========================
 # PREDICTION
 # =========================
 
-if st.button("Predict"):
+if submit:
 
     try:
 
-        values = user_input.split(";")
-
         # =========================
-        # VALIDATION
+        # CREATE RAW INPUT DATA
         # =========================
 
-        if len(values) != len(FEATURE_ORDER):
+        raw_input_data = {
+            "year": year,
+            "round": round,
+            "grid": grid,
+            "driver": driver_name,
+            "constructor": constructor_name,
+            "q1_ms": q1_ms,
+            "q2_ms": q2_ms,
+            "q3_ms": q3_ms,
+            "best_q2_ms": best_q2_ms,
+            "best_q3_ms": best_q3_ms,
+            "track": track,
+            "race_time": race_time
+        }
 
-            st.error(
-                f"Expected {len(FEATURE_ORDER)} values, "
-                f"but received {len(values)}."
+        raw_df = pd.DataFrame([raw_input_data])
+
+        # =========================
+        # DISPLAY INPUT DATA
+        # =========================
+
+        st.subheader("📋 Input Summary")
+
+        st.dataframe(
+            raw_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # =========================
+        # FEATURE ENGINEERING
+        # =========================
+
+        # Here you will later:
+        #
+        # 1. Find driverId
+        # 2. Find constructorId
+        # 3. Generate historical features
+        # 4. Generate gaps
+        # 5. Generate averages
+        # 6. Create final model input
+        #
+        # Example:
+        #
+        # model_input = FeaturePipeline.transform(raw_df)
+
+        # =========================
+        # TEMP PLACEHOLDER
+        # =========================
+
+        st.info("""
+        Feature engineering pipeline will be executed here.
+        """)
+
+        # =========================
+        # EXAMPLE PREDICTION
+        # =========================
+
+        # prediction = model.predict(model_input)[0]
+        # probabilities = model.predict_proba(model_input)[0]
+
+        # Temporary fake prediction
+
+        prediction = 1
+        probability = 0.82
+
+        # =========================
+        # RESULT
+        # =========================
+
+        st.subheader("🎯 Prediction Result")
+
+        if prediction == 1:
+
+            st.success(
+                f"""
+                Driver WILL score points.
+                
+                Probability: {probability:.2%}
+                """
             )
 
         else:
 
-            # =========================
-            # CREATE DATAFRAME
-            # =========================
-
-            df = pd.DataFrame([values], columns=FEATURE_ORDER)
-
-            # =========================
-            # NUMERIC CONVERSION
-            # =========================
-
-            numeric_cols = FEATURE_ORDER[:-2]
-
-            for col in numeric_cols:
-                df[col] = pd.to_numeric(df[col])
-
-            # =========================
-            # SHOW INPUT DATA
-            # =========================
-
-            st.subheader("📊 Parsed Input Data")
-
-            display_df = df.copy()
-
-            display_df.columns = [
-                FRIENDLY_NAMES[col]
-                for col in display_df.columns
-            ]
-
-            st.dataframe(
-                display_df,
-                use_container_width=True
+            st.warning(
+                f"""
+                Driver WILL NOT score points.
+                
+                Probability: {1 - probability:.2%}
+                """
             )
-
-            # =========================
-            # PREDICTION
-            # =========================
-
-            prediction = model.predict(df)[0]
-
-            probabilities = model.predict_proba(df)[0]
-
-            # =========================
-            # RESULT
-            # =========================
-
-            st.subheader("🎯 Prediction Result")
-
-            if prediction == 1:
-
-                st.success(
-                    f"Driver WILL score points "
-                    f"(Probability: {probabilities[1]:.2%})"
-                )
-
-            else:
-
-                st.warning(
-                    f"Driver WILL NOT score points "
-                    f"(Probability: {probabilities[0]:.2%})"
-                )
 
     except Exception as e:
 
