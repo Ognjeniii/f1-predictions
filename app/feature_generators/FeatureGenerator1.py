@@ -12,6 +12,9 @@ class FeatureGenerator1:
             (df['round'] < round)                   
         ]
 
+        if previous_races.empty:
+            return 0
+
         return previous_races['drv_points'].iloc[-1]
     
     # Before applying this method, we must provide df which is merged from races and driver_standings
@@ -22,6 +25,9 @@ class FeatureGenerator1:
             (df['year'] == year) &
             (df['round'] < round)                   
         ]
+
+        if previous_races.empty:
+            return 0
 
         return previous_races['drv_position'].iloc[-1]
     
@@ -34,6 +40,9 @@ class FeatureGenerator1:
             (df['round'] < round)                   
         ]
 
+        if previous_races.empty:
+            return 0
+
         return previous_races['drv_wins'].iloc[-1]
     
     # Before applying this method, we must provide df which is merged from races and constructor_standings
@@ -44,6 +53,9 @@ class FeatureGenerator1:
             (df['year'] == year) &
             (df['round'] < round)                   
         ]
+
+        if previous_races.empty:
+            return 0
 
         return previous_races['ctor_points'].iloc[-1]
     
@@ -56,6 +68,9 @@ class FeatureGenerator1:
             (df['round'] < round)                   
         ]
 
+        if previous_races.empty:
+            return 0
+
         return previous_races['ctor_position'].iloc[-1]
     
     # Before applying this method, we must provide df which is merged from races and constructor_standings
@@ -67,6 +82,9 @@ class FeatureGenerator1:
             (df['round'] < round)                   
         ]
 
+        if previous_races.empty:
+            return 0
+
         return previous_races['ctor_wins'].iloc[-1]
 
     # User must enter firstname and lastname, and df here is drivers dataset
@@ -77,8 +95,15 @@ class FeatureGenerator1:
             (df['surname'] == lastname)
         )]
 
-        dob = filtered['dob']
-        return (pd.Timestamp.today() - dob).dt.days / 365.25
+        dob = filtered['dob'].iloc[0]
+        return (pd.Timestamp.today() - dob).days / 365.25
+    
+    # df is drivers dataset
+    @staticmethod
+    def get_driver_age(df, driverId):
+        filtered = df[df['driverId'] == driverId]
+        dob = filtered['dob'].iloc[0]
+        return (pd.Timestamp.today() - dob).days / 365.25
         
     @staticmethod
     def get_quali_round(q2, q3):
