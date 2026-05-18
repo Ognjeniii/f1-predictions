@@ -1,8 +1,4 @@
 import streamlit as st
-import pandas as pd
-from feature_generators.FeatureGenerator1 import FeatureGenerator1
-from feature_generators.helper_methods.Utilities1 import Utilites1
-from DB.DB import DB
 
 st.set_page_config(
     page_title="F1 Prediction System",

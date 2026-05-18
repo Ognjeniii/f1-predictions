@@ -187,6 +187,10 @@ with st.form("prediction_form"):
 
 if submit:
 
+    if not q1 or not q2 or not q3 or not best_q2 or not best_q3:
+        st.error("All fields must be filled!")
+        st.stop()
+
     try:
 
         # =========================
@@ -354,5 +358,6 @@ if submit:
     except Exception as e:
 
         st.error(str(e))
-        st.code(traceback.format_exc())
+        # st.code(traceback.format_exc())
+        print(traceback.format_exc())
         
