@@ -8,7 +8,7 @@ from mapping.first_problem.drivers import drivers_list
 from mapping.first_problem.constructors import ctor_list
 from mapping.first_problem.tracks import track_list
 
-from DB import DB
+from DB.first_problem import DB
 from feature_generators.FeatureGenerator1 import FeatureGenerator1
 from feature_generators.helper_methods.Utilities1 import Utilites1
 
