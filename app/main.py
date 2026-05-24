@@ -1,5 +1,6 @@
 import streamlit as st
 from DB.second_problem.DB import DB
+from feature_generators.FeatureGenerator2 import FeatureGenerator2
 
 # st.set_page_config(
 #     page_title="F1 Prediction System",
@@ -81,7 +82,5 @@ from DB.second_problem.DB import DB
 db = DB()
 df = db.get_data()
 
-print(df)
- 
-
-
+trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 5)
+print(trend)

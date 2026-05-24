@@ -5,7 +5,10 @@ class Utilities2:
     @staticmethod
     def time_converter(df, cols):
         for col in cols:
-            df[col] = pd.to_timedelta(df[col], errors='coerce').dt.total_secondns
+            df[col] = (
+                pd.to_timedelta(df[col], errors='coerce')
+                .dt.total_seconds()
+            )
         
         return df
     

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+from feature_generators.helper_methods.Utilities2 import Utilities2
+
 class DB:
 
     def prepare_data(self, df):
@@ -11,6 +13,12 @@ class DB:
                 df[col] = df[col].astype(object)
 
         df = df.replace({pd.NA: np.nan})
+
+        timeConverter = Utilities2.time_converter(
+            df, 
+            ['LapTime', 'Sector1Time', 'Sector2Time', 'Sector3Time', 'LapStartTime']
+        )
+
         return df
     
     def create_target(self, df):
