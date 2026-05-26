@@ -82,5 +82,8 @@ from feature_generators.FeatureGenerator2 import FeatureGenerator2
 db = DB()
 df = db.get_data()
 
-trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 5)
-print(trend)
+cl_speed = FeatureGenerator2.get_closing_speed(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+print('Speeeeeeeeeeed: ', cl_speed)
+
+trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+print('Trend: ', trend)

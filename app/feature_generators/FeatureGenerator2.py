@@ -58,129 +58,60 @@ class FeatureGenerator2:
         return lap_time - mean_lap_time
 
     # ================== helper methods for closing speed ==================
-    # @staticmethod
-    # def add_cumulative_time(
-    #     df,
-    #     season_col='Season',
-    #     race_col='EventName',
-    #     driver_col='Driver',
-    #     lap_col='LapNumber',
-    #     time_col='LapTime'
-    # ):
-    #     df = df.copy()
+    @staticmethod
+    def create_gap_ahead(df, season, race, lap):
+        df = df.copy()
 
-    #     df = df.sort_values(
-    #         [season_col, race_col, driver_col, lap_col]
-    #     )
+        df = df[
+            (df['Season'] == season) &
+            (df['EventName'] == race) &
+            (df['LapNumber'] <= lap)
+        ].sort_values(['EventName', 'LapNumber', 'Position'])
 
-    #     df['CumRaceTime'] = (
-    #         df.groupby(
-    #             [season_col, race_col, driver_col]
-    #         )[time_col]
-    #         .cumsum()
-    #     )
+        grp = df.groupby(['EventName', 'LapNumber'])
 
-    #     return df
+        df['AheadLapStartTime'] = (
+            grp['LapStartTime']
+            .shift(1)
+        )
 
-    # @staticmethod
-    # def get_gap_to_ahead(
-    #     df,
-    #     season,
-    #     race,
-    #     lap_number,
-    #     driver,
-    #     season_col='Season',
-    #     race_col='EventName',
-    #     lap_col='LapNumber',
-    #     driver_col='Driver',
-    #     time_col='LapTime',
-    #     position_col='Position'
-    # ):
+        df['GapAhead'] = (
+            df['LapStartTime'] - df['AheadLapStartTime']
+        )
 
-    #     # filtriraj samo potrebnu trku i lap
-    #     lap_df = (
-    #         df[
-    #             (df[season_col] == season) &
-    #             (df[race_col] == race) &
-    #             (df[lap_col] == lap_number)
-    #         ]
-    #         .copy()
-    #         .sort_values(position_col)
-    #         .reset_index(drop=True)
-    #     )
+        return df
 
-    #     # kumulativno vreme lokalno (bez menjanja originalnog df)
-    #     lap_df['CumRaceTime'] = (
-    #         lap_df
-    #         .sort_values(position_col)[time_col]
-    #         .cumsum()
-    #     )
+    @staticmethod
+    def get_closing_speed(df, season, race, driver, lap_number, window=3):
+        df = FeatureGenerator2.create_gap_ahead(df, season, race, lap_number)
 
-    #     lap_df['gap_to_ahead'] = (
-    #         lap_df['CumRaceTime']
-    #         - lap_df['CumRaceTime'].shift(1)
-    #     )
+        drv = (
+            df[
+                (df['Season'] == season) &
+                (df['EventName'] == race) &
+                (df['Driver'] == driver) &
+                (df['LapNumber'] <= lap_number)
+            ]
+            .sort_values('LapNumber')
+            .copy()
+        )
 
-    #     row = lap_df[
-    #         lap_df[driver_col] == driver
-    #     ]
+        drv['_prev_gap'] = (
+            drv['GapAhead']
+            .shift(1)
+        )
 
-    #     if row.empty:
-    #         return None
+        drv['closing_speed'] = (
+            drv['_prev_gap'] - drv['GapAhead']
+        )
 
-    #     return row['gap_to_ahead'].iloc[0]
-    
+        return (
+            drv['closing_speed']
+            .rolling(window=window, min_periods=1)
+            .mean()
+            .iloc[-1]
+        )
 
-    # @staticmethod
-    # def get_closing_speed_live(
-    #     df,
-    #     season,
-    #     race,
-    #     driver,
-    #     lap_number,
-    #     window=3
-    # ):
-
-    #     gaps = []
-
-    #     # isto kao history u transformeru
-    #     for lap in range(1, lap_number + 1):
-
-    #         gap = FeatureGenerator2.get_gap_to_ahead(
-    #             df,
-    #             season,
-    #             race,
-    #             lap,
-    #             driver
-    #         )
-
-    #         gaps.append(gap)
-
-    #     # pandas shift(1)
-    #     closing_speeds = []
-
-    #     for i in range(1, len(gaps)):
-
-    #         prev_gap = gaps[i - 1]
-    #         curr_gap = gaps[i]
-
-    #         if prev_gap is None or curr_gap is None:
-    #             closing_speeds.append(None)
-    #         else:
-    #             closing_speeds.append(
-    #                 prev_gap - curr_gap
-    #             )
-
-    #     # pandas rolling(window).mean()
-    #     valid = [
-    #         x for x in closing_speeds[-window:]
-    #         if x is not None
-    #     ]
-
-    #     if len(valid) < window:
-    #         return None
-
-    #     return sum(valid) / window
     # =================================================================
 
     # Method that use previous laps to find do driver going faster or not - NE RADI
@@ -191,36 +122,30 @@ class FeatureGenerator2:
         race,
         driver,
         lap_number,
-        window=3,
-        season_col='Season',
-        race_col='EventName',
-        driver_col='Driver',
-        lap_col='LapNumber',
-        laptime_col='LapTime'
+        window=3
     ):
+        df = df.copy()
 
         driver_df = (
             df[
-                (df[season_col] == season) &
-                (df[race_col] == race) &
-                (df[driver_col] == driver) &
-                (df[lap_col] <= lap_number)
+                (df['Season'] == season) &
+                (df['EventName'] == race) &
+                (df['Driver'] == driver) &
+                (df['LapNumber'] <= lap_number)
             ]
-            .sort_values(lap_col)
+            .sort_values('LapNumber')
         )
 
-        laps = driver_df[laptime_col].tolist()
+        if len(driver_df) == 0:
+            return 0
 
-        if len(laps) < window + 1:
-            return None
+        driver_df['roll_mean'] = (
+            driver_df['LapTime']
+            .rolling(window=window, min_periods=1)
+            .mean()
+        )
 
-        rolling_means = []
-        for i in range(len(laps) - window + 1):
-            rolling_means.append(
-                sum(laps[i:i+window]) / window
-            )
+        driver_df['prev_roll_mean'] = driver_df['roll_mean'].shift(window)
+        driver_df['pace_trend'] = driver_df['roll_mean'] - driver_df['prev_roll_mean']
 
-        last = rolling_means[-1]
-        prev = rolling_means[-1 - window]
-
-        return last - prev
+        return driver_df['pace_trend'].iloc[-1]
