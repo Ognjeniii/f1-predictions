@@ -149,3 +149,44 @@ class FeatureGenerator2:
         driver_df['pace_trend'] = driver_df['roll_mean'] - driver_df['prev_roll_mean']
 
         return driver_df['pace_trend'].iloc[-1]
+    
+    # Method that we use to find how old tyres are.
+    @staticmethod
+    def get_tyre_degradation(
+        df, 
+        season, 
+        race,
+        driver,
+        lap_number,
+        window=3
+    ):
+        drv = (
+            df[
+                (df['Season'] == season) &
+                (df['EventName'] == race) &
+                (df['Driver'] == driver) &
+                (df['LapNumber'] <= lap_number)
+            ]
+            .copy()
+        )
+
+        if drv.empty:
+            return None
+        
+        drv = drv.sort_values(['Stint', 'TyreLife'])
+
+        drv['TyreDegradation'] = (
+            drv
+            .groupby('Stint')['LapTime']
+            .rolling(window=window, min_periods=2)
+            .mean()
+            .shift(1)
+            .reset_index(level=0, drop=True)
+        )
+
+        drv['TyreDegradation'] = (
+            drv['TyreDegradation']
+            .fillna(drv['LapTime'])
+        )
+
+        return drv['TyreDegradation'].iloc[-1]

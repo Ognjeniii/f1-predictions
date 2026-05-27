@@ -87,3 +87,6 @@ print('Speeeeeeeeeeed: ', cl_speed)
 
 trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
 print('Trend: ', trend)
+
+tyre_degradation = FeatureGenerator2.get_tyre_degradation(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+print('Tyres: ', tyre_degradation)
