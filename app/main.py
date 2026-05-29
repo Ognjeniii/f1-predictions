@@ -6,17 +6,17 @@ from feature_generators.FeatureGenerator2 import FeatureGenerator2
 #     page_title="F1 Prediction System",
 #     layout="wide"
 # )
-
+#
 # st.title("F1 Prediction System")
-
+#
 # st.write("""
 # This application demonstrates three machine learning problems:
-
+#
 # 1. Driver points prediction
 # 2. Position change prediction
 # 3. Next lap time prediction
 # """)
-
+#
 # st.info("Choose a page from the sidebar.")
 
 # ==========================================================================
@@ -79,14 +79,17 @@ from feature_generators.FeatureGenerator2 import FeatureGenerator2
 
 
 
-db = DB()
-df = db.get_data()
+# db = DB()
+# df = db.get_data()
+#
+# cl_speed = FeatureGenerator2.get_closing_speed(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+# print('Speeeeeeeeeeed: ', cl_speed)
+#
+# trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+# print('Trend: ', trend)
+#
+# tyre_degradation = FeatureGenerator2.get_tyre_degradation(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
+# print('Tyres: ', tyre_degradation)
 
-cl_speed = FeatureGenerator2.get_closing_speed(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
-print('Speeeeeeeeeeed: ', cl_speed)
-
-trend = FeatureGenerator2.get_pace_trend(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
-print('Trend: ', trend)
-
-tyre_degradation = FeatureGenerator2.get_tyre_degradation(df, 2024, 'Singapore Grand Prix', 'HAM', 6)
-print('Tyres: ', tyre_degradation)
+track_statuses = FeatureGenerator2.status_bits_transformer(264)
+print(track_statuses)
