@@ -214,12 +214,8 @@ if submit:
 
         raw_df = pd.DataFrame([raw_input_data])
 
-        # =========================
-        # DISPLAY INPUT DATA
-        # =========================
-
+        # Display input data
         st.subheader("Input Summary")
-
         st.dataframe(
             raw_df,
             use_container_width=True,

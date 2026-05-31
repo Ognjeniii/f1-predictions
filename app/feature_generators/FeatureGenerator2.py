@@ -27,6 +27,7 @@ class FeatureGenerator2:
         season,
         round_num,
         lap_number,
+        curr_lap_time,
         window=3,
         driver_col='Driver',
         season_col='Season',
@@ -48,7 +49,7 @@ class FeatureGenerator2:
         last_laps = laps[laptime_col].tail(window)
 
         if len(last_laps) == 0:
-            return None
+            return curr_lap_time
         
         return last_laps.mean()
     
