@@ -1,23 +1,23 @@
-# import streamlit as st
+import streamlit as st
 # from DB.second_problem.DB import DB
 # from feature_generators.FeatureGenerator2 import FeatureGenerator2
 
-# st.set_page_config(
-#     page_title="F1 Prediction System",
-#     layout="wide"
-# )
+st.set_page_config(
+    page_title="F1 Prediction System",
+    layout="wide"
+)
 
-# st.title("F1 Prediction System")
+st.title("F1 Prediction System")
 
-# st.write("""
-# This application demonstrates three machine learning problems:
+st.write("""
+This application demonstrates three machine learning problems:
 
-# 1. Driver points prediction
-# 2. Position change prediction
-# 3. Next lap time prediction
-# """)
+1. Driver points prediction
+2. Position change prediction
+3. Next lap time prediction
+""")
 
-# st.info("Choose a page from the sidebar.")
+st.info("Choose a page from the sidebar.")
 
 # ==========================================================================
 
@@ -95,8 +95,33 @@
 # print(track_statuses)
 
 # ---------------- THIRD PROBLEM --------------------
-from DB.third_problem.DB import DB
+# from DB.third_problem.DB import DB
+# import pandas as pd
+# pd.set_option('display.max_columns', None)
+# from feature_generators.FeatureGenerator3 import FeatureGenerator3
+#
+# db = DB()
+# df = db.get_data()
+# print(df)
+#
+# # OK
+# prev_laps = FeatureGenerator3.get_prev_lap_ms(df, 2024, 'Singapore Grand Prix', 'HAM', 5)
+# print('Previous lap(s): ', prev_laps)
+#
+# # OK
+# rolling_pace = FeatureGenerator3.get_rolling_pace(df, 2024, 'Singapore Grand Prix', 'HAM', 5)
+# print('Rolling pace: ', rolling_pace)
+#
+# # OK
+# relative_pace = FeatureGenerator3.get_relative_pace(df, 2024, 'Singapore Grand Prix', 5, 98294.0)
+# print('Relative pace: ', relative_pace)
 
-db = DB()
-df = db.get_data()
-print(df)
+# red_df = df[
+#     (df['Season'] == 2024) &
+#     (df['Round'] == 18) &
+#     (df['LapNumber'] <= 5) &
+#     (df['Driver'] == 'HAM')
+# ]
+#
+# print(red_df)
+

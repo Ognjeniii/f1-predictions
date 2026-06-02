@@ -14,7 +14,7 @@ class FeatureGenerator3:
             (df['EventName'] == event_name) &
             (df['Driver'] == driver) &
             (df['LapNumber'] == prev_lap),
-            'LapTime'
+            'LapTime_ms'
         ]
 
         if not result.empty:
@@ -25,7 +25,7 @@ class FeatureGenerator3:
             (df['EventName'] == event_name) &
             (df['Driver'] == driver) &
             (df['LapNumber'] == lap_number),
-            'LapTime'
+            'LapTime_ms'
         ]
 
         return current_result.iloc[0] if not current_result.empty else None
@@ -41,10 +41,9 @@ class FeatureGenerator3:
             (df['Season'] == season) &
             (df['EventName'] == event_name) &
             (df['Driver'] == driver) &
-            (df['LapNumber'] <= lap_number),
+            (df['LapNumber'] < lap_number),
             ['LapNumber', 'LapTime_ms']
-            .sort_values('LapNumber')
-        ]
+        ].sort_values('LapNumber')
 
         last_3 = laps.tail(3)['LapTime_ms']
 
@@ -59,15 +58,15 @@ class FeatureGenerator3:
             return current.iloc[0] if not current.empty else None
         return last_3.mean()
     
-    # Method that we use to get realtive pace of driver - drivers time - mean time for all drivers.
+    # Method that we use to get relative pace of driver - drivers time - mean time for all drivers.
     @staticmethod
-    def get_relative_pace(df, season, round, lap_number, curr_lap_time):
-        lap_mean = df.loc(
+    def get_relative_pace(df, season, event_name, lap_number, curr_lap_time):
+        lap_mean = df.loc[
             (df['Season'] == season) &
-            (df['Round'] == round) &
+            (df['EventName'] == event_name) &
             (df['LapNumber'] == lap_number),
             'LapTime_ms'
-        ).mean()
+        ].mean()
 
         if pd.isna(lap_mean):
             return 0
