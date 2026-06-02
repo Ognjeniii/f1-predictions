@@ -202,7 +202,7 @@ with st.form("prediction_form"):
         compound = st.selectbox(
             "Compound",
             options=[
-                'SOFT', 'HARD', 'MEDIUM', 'INTERMEDIATE', 'WET', 'UNKNOWN'
+                'SOFT', 'HARD', 'MEDIUM', 'INTERMEDIATE', 'WET'
             ]
         )
 
