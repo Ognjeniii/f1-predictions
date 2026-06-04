@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from feature_generators.FeatureGenerator3 import FeatureGenerator3
+from DB.third_problem.DB import DB
 
 # =========================
 # PAGE CONFIG
@@ -173,21 +175,6 @@ with st.form("prediction_form"):
         )
 
     # =========================
-    # PIT INFO
-    # =========================
-
-    st.subheader("Pit Info")
-
-    col1, col2 = st.columns(2)
-
-    # Potrebno proveriti unos i konvertovati u number
-    with col1:
-        pit_in = st.text_input("Pit In Time (sec)", value="")
-
-    with col2:
-        pit_out = st.text_input("Pit Out Time (sec)", value="")
-
-    # =========================
     # SUBMIT
     # =========================
 
@@ -204,6 +191,17 @@ with st.form("prediction_form"):
 if submit:
     try:
         
+        db = DB()
+        df = db.get_data()
+
+        lap_time_ms = lap_time_sec * 1000
+
+        prev_lap_time_ms = FeatureGenerator3.get_prev_lap_ms(df, season, event_name, driver, lap_number)
+        lap_diff_ms = FeatureGenerator3.get_lap_delta(lap_time_ms, prev_lap_time_ms)
+        pace_last_3 = FeatureGenerator3.get_rolling_pace(df, season, event_name, driver, lap_number)
+        relative_pace = FeatureGenerator3.get_relative_pace(df, season, event_name, lap_number, lap_time_ms)
+        stint_phase = FeatureGenerator3.get_stint_phase(tyre_life)
+
         df_input = pd.DataFrame([{
             "LapTime": lap_time_sec,
             "LapNumber": lap_number,
@@ -219,22 +217,29 @@ if submit:
             "TrackStatus": track_status,
             "Season": season,
             "Round": round_number,
-            "LapTime_ms": lap_time_sec * 1000,
+            "LapTime_ms": lap_time_ms,
             "Driver": driver,
             "Compound": compound,
             "Team": team,
             "FreshTyre": fresh_tyre,
             "EventName": event_name,
-            "PitInTime": pit_in,
-            "PitOutTime": pit_out
+            "prev_lap_ms": prev_lap_time_ms,
+            "lap_diff_ms": lap_diff_ms,
+            "pace_last_3": pace_last_3,
+            "relative_pace": relative_pace,
+            "stint_phase": stint_phase
         }])
 
-        # ✅ prikaz unosa
+        print(df_input)
+
         st.subheader("Input Data")
         st.dataframe(df_input, use_container_width=True)
 
-        # 👉 OVDE ubacuješ svoju logiku
-        st.success("✅ Data ready for feature generation and prediction")
+        prediction = model.predict(df_input)        
+        print(prediction)
+
+        st.subheader("Prediction Result")
+        st.success(f"Next lap time in ms: {prediction}")
 
     except Exception as e:
         st.error(str(e))
